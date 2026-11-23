@@ -139,10 +139,10 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           const SizedBox(height: 14),
           AuthField(
-            label: 'Endereço (opcional)',
+            label: 'Endereço',
             hint: 'Rua, número, bairro',
             controller: _addressCtrl,
-            validator: (v) => (v != null && v.trim().length > 50) ? 'Máximo 50 caracteres' : null,
+            validator: (v) => (v == null || v.trim().isEmpty) ? 'Obrigatório' : (v.trim().length > 50 ? 'Máximo 50 caracteres' : null),
           ),
           const SizedBox(height: 14),
           Row(

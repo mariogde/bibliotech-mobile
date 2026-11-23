@@ -7,8 +7,11 @@ import 'package:bibliotechmobile/modules/auth/pages/forgot_password_page.dart';
 import 'package:bibliotechmobile/modules/auth/pages/login_page.dart';
 import 'package:bibliotechmobile/modules/auth/pages/register_page.dart';
 import 'package:bibliotechmobile/modules/auth/services/auth_service.dart';
+import 'package:bibliotechmobile/modules/user/pages/tenant_loans_page.dart';
+import 'package:bibliotechmobile/modules/user/pages/user_dashboard_page.dart';
+import 'package:bibliotechmobile/modules/user/pages/user_profile_page.dart';
 
-// Mapeia as rotas de navegação
+// Mapeia todas as rotas de navegação do aplicativo e protege as telas restritas
 class AppRoutes {
   static const login = '/login';
   static const register = '/register';
@@ -18,13 +21,14 @@ class AppRoutes {
   static const adminBooks = '/admin/books';
   static const adminLoans = '/admin/loans';
   static const userDashboard = '/dashboard/user';
+  static const userLoans = '/user/loans';
+  static const userProfile = '/user/profile';
 
-  // Proteção ao acesso às telas internas se o usuário não estiver logado ou não for admin
+  // Bloqueia o acesso às telas internas se o usuário não estiver logado ou não for admin
   static Widget _protected(Widget page, {bool adminOnly = false}) {
     final user = AuthService.currentUser;
-    if (user == null || (adminOnly && !user.isAdmin)) {
-      return const LoginPage();
-    }
+    if (user == null) return const LoginPage();
+    if (adminOnly && !user.isAdmin) return const UserDashboardPage();
     return page;
   }
 
@@ -37,8 +41,8 @@ class AppRoutes {
         adminPublishers: (_) => _protected(const PublishersPage(), adminOnly: true),
         adminBooks: (_) => _protected(const BooksPage(), adminOnly: true),
         adminLoans: (_) => _protected(const LoansPage(), adminOnly: true),
-        userDashboard: (_) => _protected(
-              const Scaffold(body: Center(child: Text('Dashboard do Usuário'))),
-            ),
+        userDashboard: (_) => _protected(const UserDashboardPage()),
+        userLoans: (_) => _protected(const TenantLoansPage()),
+        userProfile: (_) => _protected(const UserProfilePage()),
       };
 }

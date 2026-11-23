@@ -16,28 +16,40 @@ class AuthService {
   // Autentica usuário e retorna o modelo de usuário
   static Future<UserModel> login(String email, String password) async {
     final res = await ApiClient.post('/auth/login', {'email': email, 'password': password});
+    final body = res.body.isNotEmpty ? jsonDecode(utf8.decode(res.bodyBytes)) : null;
 
-    if (res.statusCode == 200) {
-      final data = jsonDecode(res.body);
-      if (data is Map && data['token'] != null) {
-        ApiClient.token = data['token'];
+    if (res.statusCode >= 200 && res.statusCode < 300 && body is Map<String, dynamic>) {
+      ApiClient.token = body['token'] ?? body['accessToken'];
+
+      Map<String, dynamic> userData = Map<String, dynamic>.from(body);
+
+      // Se o login não trouxe o id numérico, busca pelo e-mail na listagem de usuários
+      if (userData['id'] == null || userData['id'] == 0) {
+        final usersRes = await ApiClient.get('/users');
+        if (usersRes.statusCode >= 200 && usersRes.statusCode < 300 && usersRes.body.isNotEmpty) {
+          final usersList = jsonDecode(utf8.decode(usersRes.bodyBytes));
+          if (usersList is List) {
+            for (final u in usersList) {
+              if (u is Map<String, dynamic> &&
+                  (u['email'] ?? '').toString().toLowerCase() == email.toLowerCase()) {
+                userData = u;
+                break;
+              }
+            }
+          }
+        }
       }
 
-      final userJson = (data is Map && data['user'] != null) ? data['user'] : data;
-      currentUser = UserModel.fromJson(userJson);
-
-      if (currentUser!.isDisabled) {
-        throw Exception('Conta de usuário desativada.');
+      final user = UserModel.fromJson(userData);
+      if (user.isDisabled) {
+        logout();
+        throw Exception('Esta conta está desativada. Contate o administrador.');
       }
-      return currentUser!;
+      currentUser = user;
+      return user;
     }
-
-    if (res.statusCode == 401 || res.statusCode == 403) {
-      throw Exception('E-mail ou senha inválidos.');
-    }
-    _throwError(res, 'Erro ao realizar login.');
+    throw Exception((body is Map ? (body['detail'] ?? body['message']) : null) ?? 'E-mail ou senha inválidos.');
   }
-
   // Cadastra um novo usuário
   static Future<void> register(Map<String, dynamic> userData) async {
     final res = await ApiClient.post('/users', userData);
