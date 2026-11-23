@@ -1,0 +1,14 @@
+{
+  "@@locale": "es",
+  "appTitle": "BiblioTech",
+  "email": "Correo electrónico",
+  "emailHint": "Ingrese su correo electrónico",
+  "emailRequired": "Ingrese el correo electrónico",
+  "emailInvalid": "Ingrese un correo válido",
+  "password": "Contraseña",
+  "passwordHint": "Ingrese su contraseña",
+  "passwordRequired": "Ingrese la contraseña",
+  "loginButton": "Iniciar sesión",
+  "registerNow": "Regístrese ahora",
+  "forgotPassword": "Olvidé mi contraseña"
+}
