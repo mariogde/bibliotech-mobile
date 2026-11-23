@@ -66,7 +66,7 @@ class _LoansPageState extends State<LoansPage> {
     }
     if (!mounted) return;
 
-    String selectedBookTitle = books.first.title;
+    int selectedBookId = books.first.id;
     String selectedUserCpf = users.first.cpf!;
     bool saving = false;
 
@@ -83,8 +83,8 @@ class _LoansPageState extends State<LoansPage> {
             children: [
               const Text('Livro', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(
-                value: selectedBookTitle,
+              DropdownButtonFormField<int>(
+                value: selectedBookId,
                 isExpanded: true,
                 decoration: InputDecoration(
                   filled: true,
@@ -92,9 +92,12 @@ class _LoansPageState extends State<LoansPage> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
                 items: books
-                    .map((b) => DropdownMenuItem(value: b.title, child: Text(b.title, overflow: TextOverflow.ellipsis)))
+                    .map((b) => DropdownMenuItem<int>(
+                          value: b.id,
+                          child: Text('${b.title} (${b.author})', overflow: TextOverflow.ellipsis),
+                        ))
                     .toList(),
-                onChanged: (v) => setModalState(() => selectedBookTitle = v!),
+                onChanged: (v) => setModalState(() => selectedBookId = v!),
               ),
               const SizedBox(height: 14),
               const Text('Locatário', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
@@ -108,7 +111,7 @@ class _LoansPageState extends State<LoansPage> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
                 items: users
-                    .map((u) => DropdownMenuItem(
+                    .map((u) => DropdownMenuItem<String>(
                           value: u.cpf!,
                           child: Text('${u.name} (${u.cpf})', overflow: TextOverflow.ellipsis),
                         ))
@@ -135,7 +138,8 @@ class _LoansPageState extends State<LoansPage> {
                     onPressed: () async {
                       setModalState(() => saving = true);
                       try {
-                        await AdminService.createLoan(selectedUserCpf, selectedBookTitle);
+                        final selectedBook = books.firstWhere((b) => b.id == selectedBookId);
+                        await AdminService.createLoan(selectedUserCpf, selectedBook.title);
                         if (!ctx.mounted) return;
                         Navigator.pop(ctx);
                         showAuthSnack(context, 'Aluguel registrado com sucesso!');

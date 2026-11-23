@@ -4,6 +4,7 @@ class UserModel {
   final String email;
   final String? cpf;
   final String? phone;
+  final String? dateOfBirth;
   final String? address;
   final bool isAdmin;
   final bool isDisabled;
@@ -14,20 +15,21 @@ class UserModel {
     required this.email,
     this.cpf,
     this.phone,
+    this.dateOfBirth,
     this.address,
-    required this.isAdmin,
-    required this.isDisabled,
+    this.isAdmin = false,
+    this.isDisabled = false,
   });
 
-  //conversão de JSON para UserModel
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
         id: json['id'] ?? 0,
         name: json['name'] ?? '',
         email: json['email'] ?? '',
         cpf: json['cpf'],
         phone: json['phone'],
+        dateOfBirth: json['dateOfBirth'] ?? json['birthDate'],
         address: json['address'],
-        isAdmin: json['admin'] ?? json['isAdmin'] ?? false,
-        isDisabled: json['disabled'] ?? json['isDisabled'] ?? false,
+        isAdmin: json['admin'] == true || json['role'] == 'ADMIN',
+        isDisabled: json['disabled'] == true || json['active'] == false,
       );
 }
